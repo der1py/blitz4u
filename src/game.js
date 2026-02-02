@@ -64,7 +64,7 @@ export class Game {
 
     if (!this.gameOver) {
       this.update(deltaTime);
-      this.draw();
+      this.draw(deltaTime);
       requestAnimationFrame(this.loop.bind(this));
     } else {
       this.ctx.fillStyle = "black";
@@ -157,9 +157,9 @@ export class Game {
     const distance = CONFIG.scrollSpeed * (deltaTime / 1000);
   }
 
-  draw() {
+  draw(deltaTime) {
     this.renderer.clear();
-    this.renderer.drawPlayer(this.player);
+    this.renderer.drawPlayer(this.player, deltaTime);
     this.obstacleManager.obstacles.forEach(obstacle => this.renderer.drawObstacle(obstacle));
 
     // Draw score

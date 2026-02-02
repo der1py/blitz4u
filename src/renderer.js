@@ -12,7 +12,7 @@ export class Renderer {
         this.ctx.fillRect(0, this.canvas.height - CONFIG.blockSize, this.canvas.width, CONFIG.blockSize);
     }
 
-    drawPlayer(player) {
+    drawPlayer(player, dt) {
         // hitbox for debug
         // this.ctx.fillStyle = "purple";
         // this.ctx.fillRect(player.x, player.y, player.width, player.height);
