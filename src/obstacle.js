@@ -1,24 +1,34 @@
+import { Entity } from './entity.js';
 import { CONFIG } from './game.js';
 
-export class Obstacle {
-  constructor(type, x, y, width, height) {
-    this.type = type;
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
-  }
+export class Obstacle extends Entity {
+    constructor(x, y, width, height, type, color = "red") {
+        super(x, y, width, height);
+        this.type = type;
+        this.vx = CONFIG.scrollSpeed; // horizontal movement speed
+        this.active = true; // deactivate when offscreen
+        switch (type) {
+            case 'block':
+                this.color = "black";
+                break;
+            case 'spike':
+                this.color = "red";
+                break;
+            case 'slime':
+                this.color = "green";
+                break;
+            default:
+                this.color = color;
+        }
+    }
 
-  update() {
-    this.x -= CONFIG.scrollSpeed;
-  }
+    update(dt) {
+        // Move left
+        this.x -= this.vx * dt / 1000;
 
-  getHitbox() {
-    return { x: this.x, y: this.y, width: this.width, height: this.height };
-  }
-
-  draw(ctx) {
-    ctx.fillStyle = this.type === "spike" ? "red" : "gray";
-    ctx.fillRect(this.x, this.y, this.width, this.height);
-  }
+        // Deactivate if offscreen
+        if (this.x + this.width < 0) {
+            this.active = false;
+        }
+    }
 }

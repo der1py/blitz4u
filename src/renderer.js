@@ -1,28 +1,57 @@
+import { CONFIG } from "./game.js";
+
 export class Renderer {
-  constructor(ctx, canvas) {
-    this.ctx = ctx;
-    this.canvas = canvas;
-  }
+    constructor(ctx, canvas) {
+        this.ctx = ctx;
+        this.canvas = canvas;
+    }
 
-  clear() {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-  }
+    clear() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillStyle = "black";
+        this.ctx.fillRect(0, this.canvas.height - CONFIG.blockSize, this.canvas.width, CONFIG.blockSize);
+    }
 
-  drawPlayer(player) {
-    player.draw(this.ctx);
-  }
+    drawPlayer(player) {
+        // hitbox for debug
+        // this.ctx.fillStyle = "purple";
+        // this.ctx.fillRect(player.x, player.y, player.width, player.height);
 
-  drawObstacles(obstacles) {
-    obstacles.draw(this.ctx);
-  }
+        // update sprite rotation
+        if (!player.isOnGround) {
+            player.spriteRotation += player.spriteRotationSpeed * dt / 1000;
+        } else {
+            player.spriteRotation = 0;
+        }
 
-  drawScore(score) {
-    this.ctx.fillStyle = "black";
-    this.ctx.font = "20px Arial";
-    this.ctx.fillText(`Score: ${score}`, 10, 20);
-  }
+        this.ctx.save();
 
-  drawQuiz(quizManager) {
-    quizManager.draw(this.ctx);
-  }
+        // move origin to center of sprite
+        this.ctx.translate(player.x + player.width / 2, player.y + player.height / 2);
+
+        // rotate sprite
+        this.ctx.rotate(player.spriteRotation);
+
+        // draw sprite centered
+        this.ctx.fillStyle = "cyan";
+        // this.ctx.fillRect(player.x, player.y, player.width, player.height);
+        this.ctx.fillRect(-player.width / 2, -player.height / 2, player.width, player.height);
+
+        this.ctx.restore();
+    }
+
+    drawObstacle(obstacle) {
+        this.ctx.fillStyle = obstacle.color;
+        this.ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+    }
+
+    drawQuiz(quiz) {
+        // Currently empty - quiz display logic goes here later
+    }
+
+    drawScore(score) {
+        this.ctx.fillStyle = "black";
+        this.ctx.font = "20px Arial";
+        this.ctx.fillText("Score: " + score, 10, 30);
+    }
 }

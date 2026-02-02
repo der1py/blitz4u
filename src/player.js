@@ -1,47 +1,56 @@
 import { CONFIG } from './game.js';
+import { Entity } from './entity.js';
 
-export class Player {
-  constructor(x, y, width, height) {
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
-    this.velY = 0;
-    this.onGround = false;
-  }
+export class Player extends Entity {
+    constructor(x, y) {
+        super(x, y, CONFIG.blockSize, CONFIG.blockSize);  // default size for player box
 
-  update(input) {
-    if (input.isKeyPressed(" ") && this.onGround) {
-      this.velY = CONFIG.jumpVelocity;
-      this.onGround = false;
+        // Physics
+        this.vx = 0;
+        this.vy = 0;
+        this.gravity = 3000;      // pixels/sec^2
+        this.jumpVelocity = -800; // upward jump impulse
+
+        // Ground
+        this.groundY = y;         // remember starting Y as "ground"
+        this.isOnGround = true;
+        this.groundBlock = null;
+
+        // Sprite
+        this.spriteRotation = 0;
+        this.spriteRotationSpeed = CONFIG.scrollSpeed * (Math.PI / 180) * 3;
     }
-    this.velY += CONFIG.gravity;
-    this.y += this.velY;
 
-    if (this.y + this.height >= CONFIG.canvasHeight) {
-      this.y = CONFIG.canvasHeight - this.height;
-      this.velY = 0;
-      this.onGround = true;
+    jump() {
+        if (this.isOnGround) {
+            this.vy += this.jumpVelocity;
+            this.isOnGround = false;
+        }
     }
-  }
 
-  getHitbox() {
-    return { x: this.x, y: this.y, width: this.width, height: this.height };
-  }
+    update(dt) {
+        // Apply gravity
+        this.vy += this.gravity * dt / 1000;
+        let nextY = this.y + this.vy * dt / 1000;
 
-  checkCollision(other) {
-    const a = this.getHitbox();
-    const b = other.getHitbox();
-    return (
-      a.x < b.x + b.width &&
-      a.x + a.width > b.x &&
-      a.y < b.y + b.height &&
-      a.y + a.height > b.y
-    );
-  }
+        // Ground collision
+        if (nextY >= this.groundY || (this.groundBlock && nextY >= this.groundBlock.y - this.height)) {
+            this.y = this.groundBlock ? this.groundBlock.y - this.height : this.groundY;
+            this.vy = 0;
+            this.isOnGround = true;
+        } else {
+            this.y = nextY;
+            this.isOnGround = false;
+        }
 
-  draw(ctx) {
-    ctx.fillStyle = "green";
-    ctx.fillRect(this.x, this.y, this.width, this.height);
-  }
+    }
+
+    collidesWith(e) {
+        return !(
+            this.x + this.width <= e.x ||
+            this.x >= e.x + e.width ||
+            this.y + this.height <= e.y ||
+            this.y >= e.y + e.height
+        );
+    }
 }

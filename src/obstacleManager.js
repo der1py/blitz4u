@@ -1,33 +1,67 @@
 import { Obstacle } from './obstacle.js';
 import { CONFIG } from './game.js';
+import { EASY_STRUCTURES } from './structures.js';
+import { HARD_STRUCTURES } from './structures.js';
+import { QUIZ_STRUCTURE } from './structures.js';
 
 export class ObstacleManager {
-  constructor() {
-    this.obstacles = [];
-    this.lastSpawnX = 0;
-  }
-
-  update() {
-    this.obstacles.forEach(obs => obs.update());
-    this.obstacles = this.obstacles.filter(obs => obs.x + obs.width > 0);
-
-    this.lastSpawnX += CONFIG.scrollSpeed;
-    if (this.lastSpawnX > CONFIG.obstacleSpacing) {
-      this.spawnObstacle();
-      this.lastSpawnX = 0;
+    constructor() {
+        this.obstacles = [];   // currently active obstacle instances
+        this.buffer = [];      // world buffer: upcoming columns / structures
     }
-  }
 
-  spawnObstacle() {
-    const type = Math.random() < 0.5 ? "spike" : "block";
-    const width = type === "spike" ? 20 : 50;
-    const height = type === "spike" ? 20 : 50;
-    const y = CONFIG.canvasHeight - height;
-    const obs = new Obstacle(type, CONFIG.canvasWidth, y, width, height);
-    this.obstacles.push(obs);
-  }
+    update(deltaTime) {
+        // 1. Spawn structure from buffer
+        this._spawnFromBuffer();
 
-  draw(ctx) {
-    this.obstacles.forEach(obs => obs.draw(ctx));
-  }
+        // 2. Update all active obstacles
+        this.obstacles.forEach(obstacle => obstacle.update(deltaTime));
+
+        // 3. Cleanup offscreen obstacles
+        this.obstacles = this.obstacles.filter(ob => ob.active);
+        
+       // spawn new structure if buffer is empty
+        if (this.buffer.length < 1 && this.obstacles.length < 1) {
+            this._spawnStructure(EASY_STRUCTURES[Math.floor(Math.random() * EASY_STRUCTURES.length)]);
+        }
+    }
+
+    _spawnFromBuffer(offset = 0) {
+        if (this.buffer.length === 0) {
+            return;
+        }
+
+        const column = this.buffer.shift();
+        for (let i = 0; i < column.length; i++) {
+            switch (column[i]) {
+                case 1:
+                    this.spawnObstacle(i, 'block', offset);
+                    break;
+                case 2:
+                    this.spawnObstacle(i, 'spike', offset);
+                    break;
+                case 3:
+                    this.spawnObstacle(i, 'slime', offset);
+                    break;
+                default:
+            }
+        }
+        offset++;
+        this._spawnFromBuffer(offset);
+    }
+
+    // make this actually spawn random, set to spawn one input for now lmao
+    _spawnStructure(s) {
+        // Placeholder: decide what structure to add to buffer
+        // e.g., pick a random small structure or a big one
+        // For MVP, just push an empty column
+        s.forEach((col) => {
+            this.buffer.push(col);
+        });
+
+    }
+
+    spawnObstacle(lane, type, offset = 0) {
+        this.obstacles.push(new Obstacle(CONFIG.canvasWidth + offset * CONFIG.blockSize, lane * CONFIG.blockSize, CONFIG.blockSize, CONFIG.blockSize, type));
+    }
 }
