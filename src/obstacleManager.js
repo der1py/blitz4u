@@ -1,4 +1,4 @@
-import { Obstacle } from './obstacle.js';
+import { Obstacle } from './entities/obstacle.js';
 import { CONFIG } from './game.js';
 import { EASY_STRUCTURES } from './structures.js';
 import { HARD_STRUCTURES } from './structures.js';
@@ -8,10 +8,12 @@ export class ObstacleManager {
     constructor() {
         this.obstacles = [];   // currently active obstacle instances
         this.buffer = [];      // world buffer: upcoming columns / structures
+        this.spawnCount = 0; // how much shi has been spawned
     }
 
+    // move all obstacles and delete offscreen ones
     update(deltaTime) {
-        // 1. Spawn structure from buffer
+        // 1. Spawn obstacle from buffer
         this._spawnFromBuffer();
 
         // 2. Update all active obstacles
@@ -19,11 +21,17 @@ export class ObstacleManager {
 
         // 3. Cleanup offscreen obstacles
         this.obstacles = this.obstacles.filter(ob => ob.active);
-        
-       // spawn new structure if buffer is empty
+    }
+
+    spawnNewStructure() {
+        // spawn new structure if buffer is empty
         if (this.buffer.length < 1 && this.obstacles.length < 1) {
             this._spawnStructure(EASY_STRUCTURES[Math.floor(Math.random() * EASY_STRUCTURES.length)]);
         }
+    }
+
+    resetSpawnCount() {
+        this.spawnCount = 0;
     }
 
     _spawnFromBuffer(offset = 0) {

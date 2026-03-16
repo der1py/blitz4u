@@ -41,8 +41,14 @@ export class Renderer {
     }
 
     drawObstacle(obstacle) {
-        this.ctx.fillStyle = obstacle.color;
-        this.ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+        if (obstacle.type === 'text') {
+            this.ctx.fillStyle = "black";
+            this.ctx.font = "20px Arial";
+            this.ctx.fillText(obstacle.text, obstacle.x, obstacle.y + 20);
+        } else {
+            this.ctx.fillStyle = obstacle.color;
+            this.ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+        }
     }
 
     drawQuiz(quiz) {

@@ -7,8 +7,4 @@ export class Entity {
     }
 
     update(dt) { /* default: do nothing */ }
-
-    getHitbox() {
-        return { x: this.x, y: this.y, width: this.width, height: this.height };
-    }
 }

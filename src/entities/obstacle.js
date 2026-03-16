@@ -1,5 +1,5 @@
-import { Entity } from './entity.js';
-import { CONFIG } from './game.js';
+import { Entity } from '../entity.js';
+import { CONFIG } from '../game.js';
 
 export class Obstacle extends Entity {
     constructor(x, y, width, height, type, color = "red") {

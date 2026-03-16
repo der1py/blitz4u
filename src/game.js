@@ -1,10 +1,19 @@
-import { Player } from './player.js';
+import { Player } from './entities/player.js';
 import { ObstacleManager } from './obstacleManager.js';
 import { QuizManager } from './quizManager.js';
 import { Renderer } from './renderer.js';
 import { InputHandler } from './inputHandler.js';
 import { EASY_STRUCTURES } from './structures.js'; // for debug; remove later
 import { QUIZ_STRUCTURE } from './structures.js'; // for debug; remove later
+import { scrollingText } from './entities/scrollingText.js';
+
+// states
+const GameState = Object.freeze({
+  RUNNING: 'RUNNING',
+  QUIZ: 'QUIZ',
+  GAME_OVER: 'GAME_OVER',
+  MENU: 'MENU'
+});
 
 // the ones with todo dont actually do anything lol
 const BLOCK_SIZE = 30;
@@ -48,11 +57,12 @@ export class Game {
     // Score & game state
     this.score = 0;
     this.lastTime = 0;
-    this.gameOver = false;
+    this.state = GameState.RUNNING;
 
     // deubug
     // this.obstacleManager._spawnStructure(EASY_STRUCTURES[0]);
-    this.obstacleManager._spawnStructure(QUIZ_STRUCTURE[0]);
+    // this.obstacleManager._spawnStructure(QUIZ_STRUCTURE[0]);
+    this.obstacleManager.obstacles.push(new scrollingText(CONFIG.canvasWidth, 100, 100, 0, "hello world"));
 
     // Start loop
     requestAnimationFrame(this.loop.bind(this));
@@ -62,21 +72,18 @@ export class Game {
     const deltaTime = timestamp - this.lastTime;
     this.lastTime = timestamp;
 
-    if (!this.gameOver) {
-      this.update(deltaTime);
-      this.draw(deltaTime);
-      requestAnimationFrame(this.loop.bind(this));
-    } else {
-      this.ctx.fillStyle = "black";
-      this.ctx.font = "40px Arial";
-      this.ctx.fillText(
-        "Game Over!",
-        CONFIG.canvasWidth / 2 - 100,
-        CONFIG.canvasHeight / 2
-      );
+    switch (this.state) {
+      case GameState.QUIZ:
+      case GameState.RUNNING:
+        this.update(deltaTime);
+        break;
     }
+
+    this.draw(deltaTime);
+    requestAnimationFrame(this.loop.bind(this));
   }
 
+  // update the main gameplaying state
   update(deltaTime) {
 
     // handle input
@@ -106,8 +113,10 @@ export class Game {
     this.obstacleManager.obstacles.forEach(obstacle => {
         if (this.player.collidesWith(obstacle)) {
           switch(obstacle.type) {
+            case 'text':
+              break;
             default:
-              this.gameOver = true;
+              this.state = GameState.GAME_OVER;
               break;
           }
 
@@ -135,7 +144,7 @@ export class Game {
               }
               break;
             case 'spike':
-              this.gameOver = true;
+              this.state = GameState.GAME_OVER;
               break;
             case 'slime':
               if (this.player.vy < 0) {
@@ -152,18 +161,34 @@ export class Game {
         }
     });
 
+    // spawn new structures as needed
+    if (this.state == GameState.RUNNING) this.obstacleManager.spawnNewStructure();
+
     // Endless runner scoring (could increment over time)
     this.score += 0.01 * deltaTime; // simple score per time
     const distance = CONFIG.scrollSpeed * (deltaTime / 1000);
   }
 
+  // render everything
   draw(deltaTime) {
-    this.renderer.clear();
-    this.renderer.drawPlayer(this.player, deltaTime);
-    this.obstacleManager.obstacles.forEach(obstacle => this.renderer.drawObstacle(obstacle));
-
-    // Draw score
-    this.renderer.drawScore(Math.floor(this.score));
+    console.log(this.state);
+    switch (this.state) {
+      case GameState.QUIZ:
+      case GameState.RUNNING:
+        this.renderer.clear();
+        this.renderer.drawPlayer(this.player, deltaTime);
+        this.obstacleManager.obstacles.forEach(obstacle => this.renderer.drawObstacle(obstacle));
+        this.renderer.drawScore(Math.floor(this.score));
+        break;
+      case GameState.GAME_OVER:
+        this.ctx.fillStyle = "black";
+        this.ctx.font = "40px Arial";
+        this.ctx.fillText(
+          "Game Over!",
+          CONFIG.canvasWidth / 2 - 100,
+          CONFIG.canvasHeight / 2
+        );
+    }
   }
 
 }
