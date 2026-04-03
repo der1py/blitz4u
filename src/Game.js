@@ -89,6 +89,9 @@ export class Game {
     // Score & game state
     this.score = 0;
     this.state = GameState.RUNNING;
+
+    this.goalCooldown = 0; // time remaining (ms)
+    this.maxGoalCooldown = 2000; // 2 seconds
   }
 
   loop(timestamp) {
@@ -103,12 +106,19 @@ export class Game {
     // }
     this.update(deltaTime);
     this.draw(deltaTime);
+    this.input.update(); // update input state at end of frame so justPressed works properly
     requestAnimationFrame(this.loop.bind(this));
   }
 
   // update the main gameplaying state
   update(deltaTime) {
-    console.log(this.pauseOverlay.classList);
+
+    if (this.input.isKeyJustPressed("p")) {
+      if (this.state === GameState.PAUSED) {
+        this.unpause();
+      }
+    }
+
     if (this.state === GameState.PAUSED) return;
 
     this.updateCSS();
@@ -126,6 +136,7 @@ export class Game {
         return;
       case GameState.QUIZ:
       case GameState.RUNNING:
+        if (this.input.isKeyJustPressed("p")) this.pause();
         break;
       case GameState.GAME_OVER:
         if (this.particleManager.particles.length == 0) {
@@ -151,6 +162,9 @@ export class Game {
     
     this.moveAndCollide(deltaTime);
 
+    // update goal cooldown
+    this.goalCooldown = Math.max(0, this.goalCooldown - deltaTime);
+
     // update based on state
     if (this.state == GameState.RUNNING) {
       // spawn new structures as needed
@@ -168,11 +182,6 @@ export class Game {
       if (!this.quizManager.active) this.state = GameState.RUNNING;
     }
 
-    // TODO fix scoring
-    // Endless runner scoring (could increment over time)
-    this.score += 0.01 * deltaTime; // simple score per time
-    const distance = CONFIG.scrollSpeed * (deltaTime / 1000); // TODO this bs
-
   }
 
   // render everything, only canvas stuff should be here; menus handeled separately
@@ -182,7 +191,17 @@ export class Game {
     switch (this.state) {
       case GameState.RUNNING:
       case GameState.QUIZ:
+      case GameState.PAUSED:
         this.renderer.drawPlayer(this.player, deltaTime);
+        if (this.player.isOnGround) {
+          this.particleManager.spawnParticles(
+            this.player.x - 5, 
+            this.player.y + this.player.height / 2, 
+            Math.max(1, 10 - this.particleManager.particles.length), 
+            {r:0, g:255, b:255},
+            -5, -2
+          );
+        }
         break;
       case GameState.GAME_OVER:
         // this.ctx.fillStyle = "black";
@@ -271,6 +290,20 @@ export class Game {
     this.obstacleManager.obstacles.forEach(obstacle => {
         if (this.player.collidesWith(obstacle)) {
           switch(obstacle.type) {
+            case 'goal':
+              if (this.goalCooldown <= 0) {
+                this.goalCooldown = this.maxGoalCooldown;
+                this.score += 15;
+                this.particleManager.spawnParticles(
+                  this.player.x,
+                  this.player.y,
+                  99,
+                  {r: 255, g: 215, b: 0},
+                  0,
+                  0
+                );
+              }
+              break;
             case 'text':
               break;
             default:
@@ -289,6 +322,8 @@ export class Game {
     this.obstacleManager.obstacles.forEach(obstacle => {
         if (this.player.collidesWith(obstacle)) {
           switch(obstacle.type) {
+            case 'goal':
+              break;
             case 'block':
               if (this.player.vy < 0) {
                 this.player.y = obstacle.y + obstacle.height;

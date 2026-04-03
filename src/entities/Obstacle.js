@@ -17,6 +17,9 @@ export class Obstacle extends Entity {
             case 'slime':
                 this.color = "#00FF00";
                 break;
+            case 'goal':
+                this.color = "gold";
+                break;
             default:
                 this.color = color;
         }

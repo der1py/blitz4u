@@ -1,10 +1,10 @@
 import { Entity } from '../Entity.js';
 
 export class Particle extends Entity {
-    constructor(x, y, color) {
+    constructor(x, y, color, Kvx = 3, Kvy = -5) {
         super(x, y, 0, 0);
-        this.vx = (Math.random() - 0.5) * 10 + 3;
-        this.vy = (Math.random() - 1) * 10 - 5;
+        this.vx = (Math.random() - 0.5) * 10 + Kvx;
+        this.vy = (Math.random() - 1) * 10 + Kvy;
         this.size = Math.random() * 5 + 2;
         this.color = color;
         this.life = 60;

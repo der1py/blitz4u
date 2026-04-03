@@ -14,12 +14,15 @@ export class ParticleManager {
         this.particles = this.particles.filter(p => p.active);
     }
 
-    spawnParticles(x, y, n = 30, color = {r:0, g:255, b:255}) {
+    spawnParticles(x, y, n = 30, color = {r:0, g:255, b:255}, kVx = 3, kVy = -5) {
         for (let i = 0; i < n; i++) {
             this.particles.push(new Particle(
-                x + CONFIG.blockSize / 2, 
-                y + CONFIG.blockSize / 2, 
-                color)
+                    x + CONFIG.blockSize / 2, 
+                    y + CONFIG.blockSize / 2, 
+                    color,
+                    kVx,
+                    kVy
+                )
             );
         }
     }

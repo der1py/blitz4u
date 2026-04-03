@@ -55,6 +55,9 @@ export class ObstacleManager {
                 case 3:
                     this.spawnObstacle(i, 'slime', offset);
                     break;
+                case 4:
+                    this.spawnObstacle(i, 'goal', offset);
+                    break;
                 default:
             }
         }
