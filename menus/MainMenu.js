@@ -12,8 +12,8 @@ class MainMenu extends HTMLElement {
 </div>
 <div class="header-right">
 <div class="rank-info">
-<span class="rank-label" style="">Ranked</span>
-<span class="rank-value" style="">ELITE II</span>
+<span class="rank-label" style="">COMING SOON</span>
+<span class="rank-value" style="">ACCOUNT</span>
 </div>
 <div class="avatar">
 <img alt="Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeXb1DWkG2YMoliBop32IXD7ujSyRmmhrF7p2piMVoxCiCuH8rJT1v5L1aCTM06gc6yBWSf-aALgC0LnR9H8LmtFa1nn6ko91K95yUlEkCh1p2fMXAqDn3GL_-OitXkUM2kcObwgc-JBcYVOYA6H-kJKjD7wfmDlKua2ARu0sv1Bero6bE5QK09XIJC_0H3G11QPkZPrAo3DSAZlaxD5ivCWHk3iVkpvII9JsjkOrZowZRscENPpQb4Hu1Hn1iOcb6UelNK9stog" class="" style="">
@@ -45,7 +45,7 @@ class MainMenu extends HTMLElement {
 <div class="status-left">
 <span class="" style=""><span class="online-dot"></span> 1 Online</span>
 <span class="divider" style="">|</span>
-<span class="" style="">Server: Local</span>
+<span class="" style="">Server: 127.0.0.1:5500</span>
 </div>
 <div class="version-tag" style="">v1.0.0</div>
 </footer>

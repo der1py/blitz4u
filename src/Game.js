@@ -44,6 +44,7 @@ export class Game {
 
     this.lastTime = 0;
     this.reset();
+    this.state = GameState.MENU;
 
     // Start loop
     requestAnimationFrame(this.loop.bind(this));
@@ -199,7 +200,6 @@ export class Game {
   }
 
   updateCSS() {
-    return;
     switch (this.state) {
       case GameState.MENU:
         document.getElementById("gameStyle").disabled = true;
