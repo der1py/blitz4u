@@ -65,4 +65,17 @@ export class Renderer {
         this.ctx.font = "20px Arial";
         this.ctx.fillText("Score: " + score, 10, 30);
     }
+
+    drawQuizProgress(completed, total) {
+        const text = `Questions: ${completed} / ${total}`;
+
+        this.ctx.fillStyle = "black";
+        this.ctx.font = "20px Arial";
+
+        // align with score (left side)
+        const x = 10;
+        const y = 54; // below score (which is at 30)
+
+        this.ctx.fillText(text, x, y);
+    }
 }

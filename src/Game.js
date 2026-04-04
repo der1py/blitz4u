@@ -6,6 +6,7 @@ import { QuizManager } from './QuizManager.js';
 import { Renderer } from './Renderer.js';
 import { InputHandler } from './InputHandler.js';
 import { ParticleManager } from './ParticleManager.js';
+import { QUESTION_BANK } from './QuestionBank.js';
 import { EASY_STRUCTURES } from './Structures.js'; // for debug; remove later
 
 // states
@@ -47,6 +48,9 @@ export class Game {
 
     this.setupUI();
 
+    this.questionSet = QUESTION_BANK;
+    this.prevState = GameState.RUNNING;
+
     this.reset();
     this.state = GameState.MENU;
 
@@ -83,8 +87,10 @@ export class Game {
     this.renderer = new Renderer(this.ctx, this.canvas);
     
     this.obstacleManager = new ObstacleManager();
-    this.quizManager = new QuizManager(this.obstacleManager);
+    this.quizManager = new QuizManager(this.obstacleManager, this.questionSet);
     this.particleManager = new ParticleManager();
+    this.completedQuestions = 0;
+    this.totalQuestions = this.questionSet.length;
 
     // Score & game state
     this.score = 0;
@@ -116,6 +122,7 @@ export class Game {
     if (this.input.isKeyJustPressed("p")) {
       if (this.state === GameState.PAUSED) {
         this.unpause();
+        return;
       }
     }
 
@@ -194,8 +201,8 @@ export class Game {
       case GameState.PAUSED:
         this.renderer.drawPlayer(this.player, deltaTime);
         if (this.player.isOnGround) {
-          this.particleManager.spawnParticles(
-            this.player.x - 5, 
+          this.particleManager.spawnGroundParticles(
+            this.player.x, 
             this.player.y + this.player.height / 2, 
             Math.max(1, 10 - this.particleManager.particles.length), 
             {r:0, g:255, b:255},
@@ -215,6 +222,7 @@ export class Game {
 
     this.obstacleManager.obstacles.forEach(obstacle => this.renderer.drawObstacle(obstacle));
     this.renderer.drawScore(Math.floor(this.score));
+    this.renderer.drawQuizProgress(this.completedQuestions, this.totalQuestions);
     this.particleManager.update(deltaTime); // particles are purely visual so update in draw
     this.renderer.drawParticles(this.particleManager.particles);
   }
@@ -253,15 +261,17 @@ export class Game {
   }
 
   pause() {
-    if (this.state !== GameState.RUNNING) return;
+    if (this.state !== GameState.RUNNING && this.state !== GameState.QUIZ) return;
 
+    this.prevState = this.state;
     this.state = GameState.PAUSED;
     this.score -= 10; // apply penalty immediately
     this.pauseOverlay.classList.remove("hidden");
+
   }
 
   unpause() {
-    this.state = GameState.RUNNING;
+    this.state = this.prevState;
     this.pauseOverlay.classList.add("hidden");
   }
 
@@ -275,6 +285,24 @@ export class Game {
       default:
         document.getElementById("gameStyle").disabled = false;
         document.getElementById("menuStyle").disabled = true;
+    }
+  }
+
+  enterGoal() {
+    this.goalCooldown = this.maxGoalCooldown;
+    this.score += 15;
+    this.particleManager.spawnParticles(
+      this.player.x,
+      this.player.y,
+      99,
+      {r: 255, g: 215, b: 0},
+      0,
+      0
+    );
+
+    this.completedQuestions++;
+    if (this.completedQuestions >= this.totalQuestions) {
+      console.log("gg");
     }
   }
 
@@ -292,16 +320,7 @@ export class Game {
           switch(obstacle.type) {
             case 'goal':
               if (this.goalCooldown <= 0) {
-                this.goalCooldown = this.maxGoalCooldown;
-                this.score += 15;
-                this.particleManager.spawnParticles(
-                  this.player.x,
-                  this.player.y,
-                  99,
-                  {r: 255, g: 215, b: 0},
-                  0,
-                  0
-                );
+                this.enterGoal();
               }
               break;
             case 'text':

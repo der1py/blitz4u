@@ -1,4 +1,5 @@
 import { Particle } from "./entities/Particle.js";
+import { GroundParticle } from "./entities/GroundParticle.js";
 import { CONFIG } from "./Game.js";
 
 export class ParticleManager {
@@ -17,6 +18,19 @@ export class ParticleManager {
     spawnParticles(x, y, n = 30, color = {r:0, g:255, b:255}, kVx = 3, kVy = -5) {
         for (let i = 0; i < n; i++) {
             this.particles.push(new Particle(
+                    x + CONFIG.blockSize / 2, 
+                    y + CONFIG.blockSize / 2, 
+                    color,
+                    kVx,
+                    kVy
+                )
+            );
+        }
+    }
+
+    spawnGroundParticles(x, y, n = 30, color = {r:0, g:255, b:255}, kVx = 3, kVy = -5) {
+        for (let i = 0; i < n; i++) {
+            this.particles.push(new GroundParticle(
                     x + CONFIG.blockSize / 2, 
                     y + CONFIG.blockSize / 2, 
                     color,

@@ -1,5 +1,4 @@
 import { QUIZ_STRUCTURE } from './Structures.js';
-import { QUESTION_BANK } from './QuestionBank.js';
 import { CONFIG } from './Game.js';
 
 const QuizState = Object.freeze({
@@ -9,7 +8,8 @@ const QuizState = Object.freeze({
 
 export class QuizManager {
     
-    constructor(obstacleManager) {
+    constructor(obstacleManager, questionBank) {
+        this.questionBank = questionBank
         this.obstacleManager = obstacleManager;
         this.active = false;
         this.completedQuestions = [];
@@ -59,7 +59,7 @@ export class QuizManager {
 
     // returns the next question from bank
     nextQuestion() {
-        this.available = QUESTION_BANK.filter(q => 
+        this.available = this.questionBank.filter(q => 
             !this.completedQuestions.includes(q)
         );
         if (this.available.length === 0) {
