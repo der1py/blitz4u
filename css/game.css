@@ -85,3 +85,53 @@ html {
 #pauseOverlay button:hover {
   background: rgba(255, 255, 255, 0.4);
 }
+
+/* win overlay */
+#winOverlay.hidden {
+  display: none;
+}
+
+/* Same button container */
+#winOverlay .pause-buttons {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* Same button style */
+#winOverlay button {
+  padding: 10px 20px;
+  font-size: 20px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#winOverlay button:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 600px;
+  height: 360px;
+
+  background: rgba(0, 0, 0, 0.5);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 10;
+}
+
+.overlay-content {
+  text-align: center;
+  color: white;
+}
+

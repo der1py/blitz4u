@@ -16,6 +16,7 @@ const GameState = Object.freeze({
   GAME_OVER: 'GAME_OVER',
   MENU: 'MENU',
   PAUSED: 'PAUSED',
+  WIN: 'WIN'
 });
 
 const GameMode = Object.freeze({
@@ -29,12 +30,8 @@ export const CONFIG = {
   blockSize: BLOCK_SIZE,
   canvasWidth: 20 * BLOCK_SIZE,
   canvasHeight: 12 * BLOCK_SIZE,
-  gravity: 0.6, // todo
-  jumpVelocity: -12, // todo
-  scrollSpeed: 240, // todo
-  questionDuration: 5000, // todo
-  obstacleSpacing: 250, // todo
-  laneCount: 4 // todo
+  scrollSpeed: 240, // used for obsracle movement and quiz text speed; in pixels per second
+  difficulty: 1 // 0 is ez, 1 is normal, 2 is hard
 };
 
 export class Game {
@@ -64,6 +61,18 @@ export class Game {
     this.resumeButton = document.getElementById("resumeButton");
     this.quitButton = document.getElementById("quitButton");
 
+    this.winOverlay = document.getElementById("winOverlay");
+    this.performanceText = document.getElementById("performanceText");
+    this.winMenuButton = document.getElementById("winMenuButton");
+
+    // win menu button
+    this.winMenuButton.addEventListener("click", () => {
+      this.state = GameState.MENU;   // switch to menu
+      this.toggleMenu(true, "main-menu");
+      this.toggleGame(false);
+      this.winOverlay.classList.add("hidden");
+    });
+
     // Resume button
     this.resumeButton.addEventListener("click", () => {
       this.unpause();
@@ -86,7 +95,7 @@ export class Game {
     this.input = new InputHandler();
     this.renderer = new Renderer(this.ctx, this.canvas);
     
-    this.obstacleManager = new ObstacleManager();
+    this.obstacleManager = new ObstacleManager(EASY_STRUCTURES);
     this.quizManager = new QuizManager(this.obstacleManager, this.questionSet);
     this.particleManager = new ParticleManager();
     this.completedQuestions = 0;
@@ -127,6 +136,7 @@ export class Game {
     }
 
     if (this.state === GameState.PAUSED) return;
+    if (this.state === GameState.WIN) return;
 
     this.updateCSS();
 
@@ -175,7 +185,7 @@ export class Game {
     // update based on state
     if (this.state == GameState.RUNNING) {
       // spawn new structures as needed
-      if (this.obstacleManager.spawnsSinceLastQuiz >= 3) {
+      if (this.obstacleManager.spawnsSinceLastQuiz >= 2) {
         this.state = GameState.QUIZ;
         this.obstacleManager.spawnsSinceLastQuiz = 0;
         this.quizManager.init();
@@ -258,6 +268,13 @@ export class Game {
     } else {
       this.pauseOverlay.classList.add("hidden");
     }
+
+    // show/hide win overlay
+    if (this.state == GameState.WIN) {
+      this.winOverlay.classList.remove("hidden");
+    } else {
+      this.winOverlay.classList.add("hidden");
+    }
   }
 
   pause() {
@@ -302,7 +319,13 @@ export class Game {
 
     this.completedQuestions++;
     if (this.completedQuestions >= this.totalQuestions) {
-      console.log("gg");
+      const maxScore = this.totalQuestions * 15;
+      const percent = Math.round((this.score / maxScore) * 100);
+
+      this.performanceText.textContent = `Performance Rating: ${percent}%`;
+
+      this.state = GameState.WIN;
+      this.winOverlay.classList.remove("hidden");
     }
   }
 
@@ -326,6 +349,7 @@ export class Game {
             case 'text':
               break;
             default:
+              console.log("Collided with " + obstacle.type);
               this.gameOver();
               break;
           }

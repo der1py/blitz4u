@@ -1,16 +1,16 @@
 import { Obstacle } from './entities/Obstacle.js';
 import { ScrollingText } from './entities/ScrollingText.js';
 import { CONFIG } from './Game.js';
-import { EASY_STRUCTURES } from './Structures.js';
-import { HARD_STRUCTURES } from './Structures.js';
-import { QUIZ_STRUCTURE } from './Structures.js';
 
 export class ObstacleManager {
-    constructor() {
+    constructor(s) {
         this.obstacles = [];   // currently active obstacle instances
         this.buffer = [];      // world buffer: upcoming columns / structures
         this.totalSpawns = 0; // total number of spawned obstacles (for scoring & difficulty)
         this.spawnsSinceLastQuiz = 0; // count spawns since last quiz to determine when to spawn next quiz
+        
+        this.structures = s;
+        this.completedStructures = [];
     }
 
     // move all obstacles and delete offscreen ones
@@ -28,8 +28,23 @@ export class ObstacleManager {
     spawnNewStructure() {
         // spawn new structure if buffer is empty
         if (this.buffer.length < 1 && this.obstacles.length < 1) {
-            this.spawnStructure(EASY_STRUCTURES[Math.floor(Math.random() * EASY_STRUCTURES.length)]);
+            // this.spawnStructure(EASY_STRUCTURES[Math.floor(Math.random() * EASY_STRUCTURES.length)]);
             
+            // reset if all structures used
+            if (this.completedStructures.length === this.structures.length) {
+                this.completedStructures = [];
+            }
+
+            // get unused structures
+            const available = this.structures.filter(
+                s => !this.completedStructures.includes(s)
+            );
+
+            // pick random
+            const structure = available[Math.floor(Math.random() * available.length)];
+            this.spawnStructure(structure);
+            this.completedStructures.push(structure);
+
             // increment counter here so quiz spawn doesnt affect it
             this.spawnsSinceLastQuiz++;
             this.totalSpawns++;
