@@ -112,7 +112,8 @@ export class Game {
     this.goalCooldown = 0; // time remaining (ms)
     this.maxGoalCooldown = 2000; // 2 seconds
 
-    this.obstacleManager.spawnStructure(TUTORIAL_STRUCTURES[1]); 
+    // this.obstacleManager.spawnStructure(TUTORIAL_STRUCTURES[1]);
+    this.obstacleManager.spawnStructure(EASY_STRUCTURES[0]);  
   }
 
   loadStructures() {
