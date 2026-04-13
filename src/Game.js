@@ -62,9 +62,22 @@ export class Game {
     this.reset();
     this.state = GameState.MENU;
 
+    // this.setupMobileControls();
+
     // Start loop
     requestAnimationFrame(this.loop.bind(this));
   }
+
+  // setupMobileControls() {
+  //   window.addEventListener("touchstart", (e) => {
+  //     e.preventDefault(); // stops scrolling / zooming
+  //     this.inputHandler.isMouseDown = true;
+  //   }, { passive: false });
+
+  //   window.addEventListener("touchend", () => {
+  //     this.inputHandler.isMouseDown = false;
+  //   });
+  // }
 
   setupUI() {
     // DOM references
