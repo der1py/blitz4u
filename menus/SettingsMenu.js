@@ -11,7 +11,7 @@ class SettingsMenu extends HTMLElement {
 
   <!-- HOME BUTTON ADDED -->
   <div class="header-right">
-    <button class="home-btn" id="quiz-menu-home-btn">Home</button>
+    <button class="home-btn" id="settings-menu-home-btn">Home</button>
   </div>
 
   </header>
@@ -21,18 +21,18 @@ class SettingsMenu extends HTMLElement {
 <div class="settings-section">
 <span class="section-title">Select Difficulty</span>
 <div class="btn-group difficulty-grid">
-<button class="btn-setting">Easy</button>
-<button class="btn-setting active">Normal</button>
-<button class="btn-setting">Hard</button>
-<button class="btn-setting">Focus Mode</button>
+<button class="btn-setting" data-mode="easy">Easy</button>
+<button class="btn-setting active" data-mode="normal">Normal</button>
+<button class="btn-setting" data-mode="hard">Hard</button>
+<button class="btn-setting" data-mode="focus">Focus Mode</button>
 </div>
 </div>
 <!-- Death Behavior Section -->
 <div class="settings-section">
 <span class="section-title">Death Behavior</span>
 <div class="btn-group behavior-grid">
-<button class="btn-setting active">Save Progress</button>
-<button class="btn-setting">Full Restart</button>
+<button class="btn-setting active" data-behavior="respawn">Save Progress</button>
+<button class="btn-setting" data-behavior="restart">Full Restart</button>
 </div>
 </div>
 </div>

@@ -9,7 +9,6 @@ import { ParticleManager } from './ParticleManager.js';
 import { QUESTION_BANK } from './QuestionBank.js';
 import { TRIG_ID_QUESTIONS } from './QuestionBank.js';
 import { SOLUBILITY_QUESTIONS } from './QuestionBank.js';
-import { TUTORIAL_STRUCTURES } from './Structures.js';
 import { TUTORIAL_STRUCTURE } from './Structures.js';
 import { TUTORIAL_QUESTION } from './QuestionBank.js';
 import { EASY_STRUCTURES } from './Structures.js';
@@ -39,7 +38,7 @@ export const CONFIG = {
   canvasWidth: 20 * BLOCK_SIZE,
   canvasHeight: 12 * BLOCK_SIZE,
   scrollSpeed: 240, // used for obsracle movement and quiz text speed; in pixels per second
-  difficulty: 1, // 0 is ez, 1 is normal, 2 is hard
+  difficulty: 1, // 0 is ez, 1 is normal, 2 is hard, -1 is focus
   tutorial: false,
   respawn: true,
   pointsPerQuestion: 30,
@@ -176,6 +175,8 @@ export class Game {
     let STRUCTURES = [];
 
     switch(CONFIG.difficulty) {
+      case -1:
+        break;
       case 0:
         STRUCTURES = [
           ...EASY_STRUCTURES
@@ -218,6 +219,10 @@ export class Game {
 
   // update the main gameplaying state
   update(deltaTime) {
+    if (this.input.isKeyJustPressed("m")) {
+    console.log(CONFIG.difficulty);
+    console.log(CONFIG.respawn);
+    }
 
     if (this.input.isKeyJustPressed("p")) {
       if (this.state === GameState.PAUSED) {
@@ -231,13 +236,12 @@ export class Game {
 
     this.updateCSS();
 
-    // todo debug, remove 
-    if (this.input.isKeyPressed("m")) {
-      this.state = GameState.QUIZ_MENU;
-      // window.location.href = 'test.html'
-    }
-
     switch (this.state) {
+      case GameState.SETTINGS:
+        this.toggleMenu(false);
+        this.toggleMenu(true, "settings-menu");
+        this.toggleGame(false);
+        return;
       case GameState.QUIZ_MENU:
         this.toggleMenu(false);
         this.toggleMenu(true, "quiz-menu");
@@ -290,6 +294,10 @@ export class Game {
 
     // update based on state
     if (this.state == GameState.RUNNING) {
+      if (CONFIG.difficulty == -1) {
+        this.state = GameState.QUIZ;
+        this.quizManager.init();
+      }
       // spawn new structures as needed
       if (this.obstacleManager.spawnsSinceLastQuiz >= 2) {
         this.state = GameState.QUIZ;
@@ -416,6 +424,11 @@ export class Game {
         document.getElementById("menuStyle").disabled = true;
         document.getElementById("quizMenuStyle").disabled = false;
         break;
+      case GameState.SETTINGS:
+        document.getElementById("gameStyle").disabled = true;
+        document.getElementById("menuStyle").disabled = true;
+        document.getElementById("settingsMenuStyle").disabled = false;
+        break;
       default:
         document.getElementById("gameStyle").disabled = false;
         document.getElementById("menuStyle").disabled = true;
@@ -528,6 +541,7 @@ export class Game {
 
   setConfig(key, val) {
     CONFIG[key] = val;
+    console.log(`Config updated: ${key} = ${val}`);
   }
 
 }
