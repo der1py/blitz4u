@@ -10,8 +10,8 @@ document.getElementById("playBtn").addEventListener("click", () => {
     game.reset();
 });
 
-document.getElementById("playBtn").addEventListener("click", () => {
-    game.setConfig('tutorial', false);
+document.getElementById("tutorialBtn").addEventListener("click", () => {
+    game.setConfig('tutorial', true);
     game.reset();
 });
 

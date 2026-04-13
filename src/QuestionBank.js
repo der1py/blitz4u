@@ -1,3 +1,10 @@
+export const TUTORIAL_QUESTION = [
+    {
+        text: "derivative of e^x = ?",
+        options: ["e^x", "x*e^(x-1)", "0", "e^x + C"]
+    },
+]
+
 export const QUESTION_BANK = [
     {
         text: "2 + 2 = ?",

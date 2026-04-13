@@ -10,6 +10,8 @@ import { QUESTION_BANK } from './QuestionBank.js';
 import { TRIG_ID_QUESTIONS } from './QuestionBank.js';
 import { SOLUBILITY_QUESTIONS } from './QuestionBank.js';
 import { TUTORIAL_STRUCTURES } from './Structures.js';
+import { TUTORIAL_STRUCTURE } from './Structures.js';
+import { TUTORIAL_QUESTION } from './QuestionBank.js';
 import { EASY_STRUCTURES } from './Structures.js';
 import { HARD_STRUCTURES } from './Structures.js';
 
@@ -22,7 +24,7 @@ const GameState = Object.freeze({
   QUIZ_MENU: 'QUIZ_MENU',
   SETTINGS: 'SETTINGS',
   PAUSED: 'PAUSED',
-  WIN: 'WIN'
+  WIN: 'WIN',
 });
 
 const GameMode = Object.freeze({
@@ -97,7 +99,7 @@ export class Game {
     // check if new questions selected
     switch (CONFIG.quiz) {
       case 0:
-        this.questionSet = QUESTION_BANK;
+        this.questionSet = QUESTION_BANK; // erm
         break;
       case 1:
         this.questionSet = TRIG_ID_QUESTIONS;
@@ -114,7 +116,7 @@ export class Game {
         alert("Invalid quiz selected, returning to menu");
     }
 
-    if (CONFIG.tutorial) this.questionSet = QUESTION_BANK; // override if tutorial mode
+    if (CONFIG.tutorial) this.questionSet = TUTORIAL_QUESTION; // override if tutorial mode
 
     // Player setup
     this.player = new Player(3 * CONFIG.blockSize, 10 * CONFIG.blockSize);
@@ -138,6 +140,17 @@ export class Game {
     this.goalCooldown = 0; // time remaining (ms)
     this.maxGoalCooldown = 2000; // 2 seconds
 
+    if (CONFIG.tutorial)  {
+      this.obstacleManager.spawnStructure(TUTORIAL_STRUCTURE[0]); 
+      this.obstacleManager.spawnScrollingText(6, "click or press space to jump", 0);
+      this.obstacleManager.spawnScrollingText(6, "red kills u :O", 30);
+      this.obstacleManager.spawnScrollingText(6, "green = bouncy :D", 50);
+      this.obstacleManager.spawnScrollingText(2, "fall from higher to bounce higher!", 80);
+      this.obstacleManager.spawnScrollingText(6, "answer correctly or DIE 😨", 105);
+      this.obstacleManager.spawnScrollingText(8, "press p or menu icon to pause for more time,", 105);
+      this.obstacleManager.spawnScrollingText(9, "but you take a score penalty", 105);
+    }
+
     // this.obstacleManager.spawnStructure(TUTORIAL_STRUCTURES[1]);
     // this.obstacleManager.spawnStructure(EASY_STRUCTURES[0]);  
   }
@@ -156,7 +169,7 @@ export class Game {
   loadStructures() {
 
     if (CONFIG.tutorial) {
-      this.obstacleManager = new ObstacleManager(TUTORIAL_STRUCTURES);
+      this.obstacleManager = new ObstacleManager(TUTORIAL_STRUCTURE);
       return;
     }
 
@@ -241,7 +254,8 @@ export class Game {
         break;
       case GameState.GAME_OVER:
         if (this.particleManager.particles.length == 0) {
-          if (CONFIG.respawn) this.softReset();
+          if (CONFIG.tutorial) this.reset();
+          else if (CONFIG.respawn) this.softReset();
           else this.reset();
         }
         return;
@@ -266,6 +280,13 @@ export class Game {
 
     // update goal cooldown
     this.goalCooldown = Math.max(0, this.goalCooldown - deltaTime);
+
+
+    // start quiz in tutorial
+    if (CONFIG.tutorial && this.obstacleManager.obstacles.length == 0 && !this.quizManager.active) {
+        this.state = GameState.QUIZ;
+        this.quizManager.init();
+    }
 
     // update based on state
     if (this.state == GameState.RUNNING) {
